@@ -5,7 +5,7 @@ using namespace std;
 
 bool isEndLine(string line) {
     int numOfZero = 0;
-    
+
     for (unsigned char c : line) {
         if (c == '0') {
             numOfZero++;
@@ -21,12 +21,12 @@ int main() {
     int n;
     cin >> n;
     cin.ignore();
-    
+
     string line_start;
     for (int i = 1; i <= n; i++) {
         string line;
         getline(cin, line);
-        
+
         for (unsigned char c : line) {
             if (c == '0') {
                 line_start = line;
@@ -38,7 +38,7 @@ int main() {
 
     vector<string> cancer_zone;
     cancer_zone.push_back(line_start);
-    
+
     string possibleEnd;
     while (getline(cin, possibleEnd)) {
         if (!isEndLine(possibleEnd)) {
@@ -56,7 +56,7 @@ int main() {
             }
         }
     }
-    
+
     cout << count;
     return 0;
 }
