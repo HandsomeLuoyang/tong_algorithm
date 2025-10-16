@@ -17,17 +17,45 @@ jobs:
 
       - name: Check code format with Clang Format
         run: |
+          echo "Running clang-format check..."
           # 查找所有C++源文件（可根据实际路径调整）
           find . -name "*.cpp" -o -name "*.h" -o -name "*.hpp" -o -name "*.c++" | while read file; do
-            # 检查格式，--dry-run只报告不修改，--Werror将警告转为错误
-            clang-format --dry-run --Werror --style=file "$file"
+            echo "Checking format for $file"
+            # 检查格式，--dry-run只报告不修改，-Werror将警告转为错误
+            # 使用 --verbose 显示详细信息
+            if ! clang-format --dry-run --Werror --style=file "$file"; then
+              echo "ERROR: Format check failed for $file"
+              echo "To fix, run: clang-format -i --style=file $file"
+              echo "Format differences:"
+              clang-format --style=file "$file" | diff -u "$file" -
+              exit 1
+            fi
           done
+          echo "Clang-format check passed for all files"
 
       - name: Basic style/quality check with Clang Tidy
         run: |
+          echo "Running clang-tidy check..."
           # 对纯算法代码进行基础检查（不依赖编译数据库）
           find . -name "*.cpp" -o -name "*.h" -o -name "*.hpp" -o -name "*.c++" | while read file; do
-            clang-tidy "$file" \
+            echo "Checking style for $file"
+            # 使用 --export-fixes 将问题导出到文件以便查看
+            if ! clang-tidy "$file" \
               --config-file=.clang-tidy \
-              --warnings-as-errors=*  # 警告视为错误，阻止合并
+              --warnings-as-errors=* \
+              --export-fixes=fixes.yaml; then
+              echo "ERROR: Style check failed for $file"
+              echo "Detailed error information:"
+              # 显示具体的错误信息
+              if [ -f fixes.yaml ]; then
+                cat fixes.yaml
+                rm fixes.yaml
+              fi
+              exit 1
+            fi
+            # 清理临时文件
+            if [ -f fixes.yaml ]; then
+              rm fixes.yaml
+            fi
           done
+          echo "Clang-tidy check passed for all files"
