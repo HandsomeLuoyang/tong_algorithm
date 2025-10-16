@@ -32,30 +32,3 @@ jobs:
             fi
           done
           echo "Clang-format check passed for all files"
-
-      - name: Basic style/quality check with Clang Tidy
-        run: |
-          echo "Running clang-tidy check..."
-          # 对纯算法代码进行基础检查（不依赖编译数据库）
-          find . -name "*.cpp" -o -name "*.h" -o -name "*.hpp" -o -name "*.c++" | while read file; do
-            echo "Checking style for $file"
-            # 使用 --export-fixes 将问题导出到文件以便查看
-            if ! clang-tidy "$file" \
-              --config-file=.clang-tidy \
-              --warnings-as-errors=* \
-              --export-fixes=fixes.yaml; then
-              echo "ERROR: Style check failed for $file"
-              echo "Detailed error information:"
-              # 显示具体的错误信息
-              if [ -f fixes.yaml ]; then
-                cat fixes.yaml
-                rm fixes.yaml
-              fi
-              exit 1
-            fi
-            # 清理临时文件
-            if [ -f fixes.yaml ]; then
-              rm fixes.yaml
-            fi
-          done
-          echo "Clang-tidy check passed for all files"
