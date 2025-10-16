@@ -1,0 +1,4 @@
+BasedOnStyle: Google  # 基于Google风格（也可换成LLVM、Mozilla等）
+IndentWidth: 4        # 缩进4空格
+ColumnLimit: 100      # 算法代码行宽可适当放宽
+AllowShortLoopsOnASingleLine: true  # 短循环允许单行（如for(int i=0;i<10;++i) f(i);）

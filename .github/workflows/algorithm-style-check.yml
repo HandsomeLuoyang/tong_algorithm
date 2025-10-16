@@ -1,0 +1,33 @@
+name: Algorithm Code Style Check
+
+# 仅在MR操作时触发
+on: [pull_request]
+
+jobs:
+  style-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format clang-tidy  # 安装核心工具
+
+      - name: Check code format with Clang Format
+        run: |
+          # 查找所有C++源文件（可根据实际路径调整）
+          find . -name "*.cpp" -o -name "*.h" -o -name "*.hpp" | while read file; do
+            # 检查格式，--dry-run只报告不修改，--Werror将警告转为错误
+            clang-format --dry-run --Werror --style=file "$file"
+          done
+
+      - name: Basic style/quality check with Clang Tidy
+        run: |
+          # 对纯算法代码进行基础检查（不依赖编译数据库）
+          find . -name "*.cpp" -o -name "*.h" -o -name "*.hpp" | while read file; do
+            clang-tidy "$file" \
+              --checks=-*,readability-*,google-*,modernize-* \  # 启用基础风格检查
+              --warnings-as-errors=*  # 警告视为错误，阻止合并
+          done
